@@ -31,12 +31,12 @@ jobs:
       - name: Install Playwright browsers
         run: playwright install
 
-      - name: Run UI Tests
-        run: pytest tests/test_login.py -v --html=reports/report.html --self-contained-html
-        continue-on-error: true
-
       - name: Run API Tests
         run: pytest tests/test_api.py -v --html=reports/api_report.html --self-contained-html
+        continue-on-error: true
+
+      - name: Run UI Tests
+        run: pytest tests/test_login.py -v --html=reports/report.html --self-contained-html
         continue-on-error: true
 
       - name: Upload Test Reports
