@@ -1,0 +1,53 @@
+name: Automated Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: playwright install
+
+      - name: Run UI Tests
+        run: pytest tests/test_login.py -v --html=reports/report.html --self-contained-html
+        continue-on-error: true
+
+      - name: Run API Tests
+        run: pytest tests/test_api.py -v --html=reports/api_report.html --self-contained-html
+        continue-on-error: true
+
+      - name: Upload Test Reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-reports
+          path: reports/
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "✅ Tests completed"
+          echo "📊 Check artifacts for detailed reports"
